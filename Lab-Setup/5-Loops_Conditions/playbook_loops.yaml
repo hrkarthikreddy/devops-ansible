@@ -1,0 +1,56 @@
+---
+- name: Examples of Loops used in Ansible
+  hosts: localhost
+  gather_facts: true
+  become: true
+  tasks:
+
+  - name : Basic Loop Over a List
+    ansible.builtin.file:
+      path: "/tmp/ansible-{{ item }}"
+      state: touch
+    loop:
+        - karthik
+        - satish
+        - balaji
+
+  - name: Loop over the users details from the file /etc/passwd
+    ansible.builtin.getent:
+      database: passwd
+
+  - name: Loop Over a Dictionary
+    vars:
+      users:
+        - name: karthik
+          uid: 10001
+        - name: satish
+          uid: 10002
+        - name: balaji
+          uid: 10003
+    ansible.builtin.user:
+      name: "{{ item.name }}"
+      uid: "{{ item.uid }}"
+      state: present
+    loop: "{{ users }}"
+    when: ansible_facts.getent_passwd is defined and item.name not in ansible_facts.getent_passwd
+
+  - name: Get details of all users at once
+    ansible.builtin.getent:
+      database: passwd
+
+  - name: Show user details
+    vars:
+      users:
+        - karthik
+        - satish
+        - balaji
+    ansible.builtin.debug:
+      msg: "Users:{{ item }} exists: {{ ansible_facts.getent_passwd[item] }}"
+    loop: "{{ users }}"
+    when: item in ansible_facts.getent_passwd
+
+
+
+
+
+  

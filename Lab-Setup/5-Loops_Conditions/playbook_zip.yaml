@@ -1,0 +1,17 @@
+---
+- name: Loop With Multiple Lists (zip)
+  hosts: localhost
+  become: true
+  gather_facts: yes
+  vars:
+    users: ["karthik", "satish", "balaji"]
+    uids: [10001, 10002, 10003]
+    shells: ["/bin/bash", "/bin/sh", "/bin/zsh"]
+  tasks:
+    - name: Create users with multiple lists
+      ansible.builtin.user:
+        name: "{{ item.0 }}"
+        uid: "{{ item.1 }}"
+        shell: "{{ item.2 }}"
+        state: present
+      loop: "{{ users | zip(uids, shells) | list }}"

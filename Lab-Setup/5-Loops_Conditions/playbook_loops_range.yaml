@@ -1,0 +1,12 @@
+---
+- name: Examples of Loops used in Ansible
+  hosts: localhost
+  gather_facts: true
+  become: true
+  tasks:
+
+  - name : Basic Loop Over a List
+    ansible.builtin.file:
+      path: "/tmp/ansible-{{ item }}"
+      state: touch
+    loop: "{{ range(1,10)| list }}"

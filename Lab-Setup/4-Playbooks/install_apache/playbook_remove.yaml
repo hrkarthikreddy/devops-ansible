@@ -1,0 +1,51 @@
+---
+- name: "Remove Apache Web Server"
+  hosts: Webservers
+  gather_facts: true
+  become: true
+  tasks:
+    - name: "Check Apache status"
+      command: systemctl status httpd
+      register: apache_status
+      changed_when: false
+      failed_when: false
+
+    - name: "Stop Apache service"
+      ansible.builtin.service:
+        name: httpd
+        state: stopped
+        enabled: false
+      when: "'running' in apache_status.stdout"
+
+    - name: "Remove Apache packages and dependencies"
+      ansible.builtin.package:
+        name: httpd
+        state: absent
+        autoremove: true
+
+    - name: "Remove Apache configuration files"
+      ansible.builtin.file:
+        path: /etc/httpd
+        state: absent
+
+    - name: "Remove Apache web content"
+      ansible.builtin.file:
+        path: /var/www/html
+        state: absent
+
+    - name: "Remove Firewalld rules for HTTP"
+      ansible.posix.firewalld:
+        service: http
+        permanent: true
+        state: disabled
+        immediate: true
+
+    - name: "Reload Firewall"
+      ansible.builtin.service:
+        name: firewalld
+        state: reloaded
+
+    - name: "Ensure SELinux is set to enforcing"
+      ansible.posix.selinux:
+        policy: targeted
+        state: enforcing

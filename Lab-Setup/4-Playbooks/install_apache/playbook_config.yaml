@@ -1,0 +1,19 @@
+---
+# Playbook to configure the Apache web server
+
+- name: Playbook to configure Apache web server in dev and prod
+  hosts: Webservers
+  gather_facts: true
+  become: true
+  tasks:
+    - name: Configure Dev Webserver
+      ansible.builtin.copy:
+        src: ./html/dev.html
+        dest: /var/www/html/index.html
+      when: "'dev' in group_names"
+
+    - name: Configure Prod Webserver
+      ansible.builtin.copy:
+        src: ./html/prod.html
+        dest: /var/www/html/index.html
+      when: "'prod' in group_names"

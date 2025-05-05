@@ -1,0 +1,37 @@
+- name: Ignore Errors
+  hosts: localhost
+  become: false
+  gather_facts: no
+  tasks:
+    - name: Create a File in root
+      ansible.builtin.file:
+        path: /root/ansible-test
+        state: touch
+      register: result_file
+      ignore_errors: yes
+
+    - name: Print the error message
+      ansible.builtin.debug:
+        #var: result_file
+        msg: "Command failed with error - {{ result_file.msg }}"
+      when: result_file.failed
+
+    - name: Ignore errors while installation and also ignore errors in loop
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: present
+      register: result_install
+      loop:
+        - dummy1
+        - dummy2
+        - dummy3
+      ignore_errors: yes
+
+    - name: Print the error message
+      ansible.builtin.debug:
+        #var: result_install
+        msg: |
+          "Failed to install package - {{ result_install.results[0].item }} - {{ result_install.results[0].msg }}"
+          "Failed to install package - {{ result_install.results[1].item }} - {{ result_install.results[1].msg }}"
+          "Failed to install package - {{ result_install.results[2].item }} - {{ result_install.results[2].msg }}"
+      when: result_install.failed

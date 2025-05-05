@@ -1,0 +1,22 @@
+---
+- name: Remove users
+  hosts: localhost
+  gather_facts: yes
+  become: true
+  tasks:
+
+    - name : Get user details
+      ansible.builtin.getent:
+        database: passwd
+  
+    - name: Remove users
+      vars:
+        users:
+          - karthik
+          - satish
+          - balaji
+      ansible.builtin.user:
+        name: "{{ item}}"
+        state: absent
+      loop: "{{ users }}"
+      when: ansible_facts.getent_passwd is defined and item in ansible_facts.getent_passwd

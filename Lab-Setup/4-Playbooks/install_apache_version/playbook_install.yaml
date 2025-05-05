@@ -1,0 +1,51 @@
+#Install apache version: 2.4.37-30.0.1
+---
+- name: Install apache version-2.4.37
+  hosts: Webservers
+  gather_facts: true
+  become: true
+  tasks:
+  - name: Install apache version-2.4.37
+    ansible.builtin.package:
+      name: httpd-2.4.37
+      state: present
+
+  - name: Get the apache version
+    ansible.builtin.command: httpd -v
+    register: httpd_version
+
+  # - name: Display version
+  #   ansible.builtin.debug:
+  #     var: httpd_version.stdout_lines
+
+  # - name: Display Hostname
+  #   ansible.builtin.debug:
+  #     var: ansible_hostname
+
+  - name: Display Hostname and Apache Version
+    ansible.builtin.debug:
+      msg: |
+        Apache Version: "{{ httpd_version.stdout_lines [0]}}"
+        Hostname: {{ ansible_hostname }}
+
+  - name: Copy ansible builtin templete to html folder
+    ansible.builtin.template:
+      src: index.j2
+      dest: "/var/www/html/index.html"
+      mode: '0744'
+      owner: root
+      group: root
+
+  - name: Start apache server
+    ansible.builtin.service:
+      name: httpd
+      enabled: true
+      state: restarted
+
+  - name: Add Firewall Rule
+    ansible.posix.firewalld:
+      service: http
+      permanent: true
+      state: enabled
+      immediate: yes
+    when: ansible_os_family == "RedHat"

@@ -1,0 +1,38 @@
+---
+
+- name : "Install Apache Web Server"
+  hosts : Webservers
+  gather_facts : true
+  become : true
+  tasks :
+    - name : "Install Apache"
+      ansible.builtin.yum:
+        name : httpd
+        state : present
+
+    - name : "Start Apache Service"
+      ansible.builtin.service:
+        name : httpd
+        state : started
+        enabled : true
+
+# Conffigure Firewall to allow HTTP traffic
+    - name : "Ensure Firewall is configured to allow HTTP traffic"
+      ansible.posix.firewalld:
+        service : http
+        permanent : true
+        state : enabled
+
+    - name : "Reload Firewall"
+      ansible.builtin.service:
+        name : firewalld
+        state : reloaded
+        
+# Check if SELinux is enabled and set to permissive
+    - name : "Ensure SELinux is set to permissive"  
+      command : setenforce 0
+      when : ansible_selinux.status == "enabled"
+
+    - name : "Ensure Apache is running"
+      command : systemctl status httpd
+      register : apache_status

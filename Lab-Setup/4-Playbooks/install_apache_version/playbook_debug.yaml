@@ -1,0 +1,16 @@
+---
+
+- name: Generate the debug messages
+  hosts: Webservers
+  gather_facts: true
+  become: true
+  tasks:
+    - name: Debug messages
+      ansible.builtin.debug:
+        # var: ansible_facts
+        msg: |
+          - IP : {{ ansible_facts['all_ipv4_addresses'] }}
+          - Date: {{ ansible_facts['date_time']['date'] }}
+          - IP Details : {{ ansible_facts['default_ipv4'] }}
+          - Hostname : {{ ansible_facts['hostname'] }}
+          - OS: {{ ansible_facts['os_family'] }}

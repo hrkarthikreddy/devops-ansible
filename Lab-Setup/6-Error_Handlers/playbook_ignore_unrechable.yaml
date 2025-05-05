@@ -1,0 +1,14 @@
+- name: Ignore errors if host unreachable
+  hosts: all
+  become: false
+  gather_facts: no
+  ignore_unreachable: true
+  tasks:
+    - name: Run true
+      ansible.builtin.command:
+        cmd: /bin/true
+    
+    - name: Create a File in tmp
+      ansible.builtin.file:
+        path: /tmp/ansible-test
+        state: touch
