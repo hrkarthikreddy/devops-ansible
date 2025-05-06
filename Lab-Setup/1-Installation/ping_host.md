@@ -1,4 +1,4 @@
-# Objective
+# Objective: Ping Remote hosts to test connectivity
 1. open file /etc/ansible/host
 2. make host enty
     #username@ip/hostname
