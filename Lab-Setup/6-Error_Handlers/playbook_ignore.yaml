@@ -3,6 +3,7 @@
   become: false
   gather_facts: no
   tasks:
+    # Ignore errors
     - name: Create a File in root
       ansible.builtin.file:
         path: /root/ansible-test
@@ -10,12 +11,14 @@
       register: result_file
       ignore_errors: yes
 
+    # Execute if error
     - name: Print the error message
       ansible.builtin.debug:
         #var: result_file
         msg: "Command failed with error - {{ result_file.msg }}"
       when: result_file.failed
 
+    # Loop Error Handeling
     - name: Ignore errors while installation and also ignore errors in loop
       ansible.builtin.package:
         name: "{{ item }}"
@@ -26,7 +29,8 @@
         - dummy2
         - dummy3
       ignore_errors: yes
-
+      
+    # Execute if error
     - name: Print the error message
       ansible.builtin.debug:
         #var: result_install

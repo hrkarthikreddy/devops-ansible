@@ -16,7 +16,7 @@
           - satish
           - balaji
       ansible.builtin.user:
-        name: "{{ item}}"
+        name: "{{ item }}"
         state: absent
       loop: "{{ users }}"
       when: ansible_facts.getent_passwd is defined and item in ansible_facts.getent_passwd

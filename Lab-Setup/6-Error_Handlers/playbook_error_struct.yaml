@@ -1,0 +1,73 @@
+#Structured Error Handling with block, rescue, and always
+---
+- name: Ansible Error Handeling
+  hosts: all
+  gather_facts: yes
+  become: true
+  tasks:
+
+  # Block to group tasks and handle errors
+  - block:
+    - name: Install and validate Nginx, with Error handeling
+      ansible.builtin.package:
+        name: nginx
+        state: present
+
+    # Custom error condition with failed_when
+    - name: Validate Nginx COnfiguation Syntax (Check the custom failure condition)
+      ansible.builtin.command: nginx -t
+      register: nginx_test
+      failed_when: "'syntax is ok' not in nginx_test.stderr"
+
+    - name: Start adn Enable Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+    # Retry until the condition is met, with a delay
+    - name: Retry until the Nginx is running
+      ansible.builtin.shell: systemctl is-active nginx
+      register: nginx_status
+      until: nginx_status.stdout == "active"
+      retries: 5
+      delay: 5
+
+    - name: Nginx running status
+      ansible.builtin.debug:
+        msg: Nginx server status is - {{ nginx_status.stdout }}
+
+  # Rollback method if the above block failes
+    rescue:
+      - name: Log Failure and show which task failed
+        ansible.builtin.debug:
+          msg: |
+            Block failed on task- {{ ansible_failed_task }}
+            Error- {{ ansible_failed_result }}
+
+      - name: Clean Up installation
+        ansible.builtin.package:
+          name: nginx
+          state: absent
+
+      - name: Set Nginx installation status
+        set_fact:
+          nginx_install_status: "Failed"
+      
+  # Runs this block irrespective of the status of other blocks
+    always:
+      - name: Verify Nginx installation
+        set_fact:
+          nginx_install_status: "{{ nginx_install_status | default('Success') }}"
+
+      - name: Finally the Nginx installation status
+        ansible.builtin.debug:
+          msg: >-
+              {{ 'Nginx installation is successful' if nginx_install_status == 'Success' else 'Nginx installation failed' }}
+
+
+
+
+
+
+
