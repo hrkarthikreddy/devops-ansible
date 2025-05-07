@@ -71,11 +71,11 @@ Ansible allows you to retry tasks that may fail due to temporary conditions (suc
 - retries: The maximum number of attempts to run the task.
 - delay: The number of seconds to wait between retries.
 
-    Example: Retry Until a File Exists
-    - name: Check if file exists, retry until it does
-    stat:
-        path: /tmp/example.txt
-    register: file_check
-    until: file_check.stat.exists
-    retries: 5
-    delay: 10
+            Example: Retry Until a File Exists
+            - name: Check if file exists, retry until it does
+            stat:
+                path: /tmp/example.txt
+            register: file_check
+            until: file_check.stat.exists
+            retries: 5
+            delay: 10
