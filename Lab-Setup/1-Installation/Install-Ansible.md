@@ -6,6 +6,15 @@
 # OR
 
 # Installing Ansible by python PIP module
-        1. sudo python -m pip install ansible  
 
+##  Install as sudo user
 
+        sudo python -m pip install ansible
+
+##  Install ansible specific to a user
+
+        python -m pip install --user ansible
+
+##  Install ansible (minimal) specific to a user
+
+        python -m pip install --user ansible-core
