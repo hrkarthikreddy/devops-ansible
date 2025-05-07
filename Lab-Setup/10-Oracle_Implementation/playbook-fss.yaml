@@ -1,0 +1,43 @@
+---
+- name: Mount OCI FSS on Oracle Linux Compute
+  hosts: localhost
+  become: yes
+  vars:
+    fss_ip: "172.16.0.52"              # Replace with your FSS mount target's IP
+    fss_remote_path: "/nacie-fss-ans"    # Remote export path
+    mount_point: "/mnt/oci-fss"     # Local directory to mount FSS
+    fstab_line: "{{ fss_ip }}:{{ fss_remote_path }} {{ mount_point }} nfs defaults,timeo=600,retrans=2 0 0"
+
+  tasks:
+
+    - name: Ensure NFS utilities are installed
+      yum:
+        name: nfs-utils
+        state: present
+
+    - name: Create the mount point directory
+      file:
+        path: "{{ mount_point }}"
+        state: directory
+        mode: '0755'
+
+    - name: Mount the OCI FSS export
+      mount:
+        path: "{{ mount_point }}"
+        src: "{{ fss_ip }}:{{ fss_remote_path }}"
+        fstype: nfs
+        opts: "defaults,timeo=600,retrans=2"
+        state: mounted
+
+    - name: Add entry to /etc/fstab
+      lineinfile:
+        path: /etc/fstab
+        line: "{{ fstab_line }}"
+        state: present
+        create: yes
+        insertafter: EOF
+      notify: Remount FSS
+
+  handlers:
+    - name: Remount FSS
+      command: "mount -a"
