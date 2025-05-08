@@ -1,6 +1,6 @@
 #Structured Error Handling with block, rescue, and always
 ---
-- name: Ansible Error Handeling
+- name: Nginx Installation & Ansible Error Handeling in a structured block
   hosts: all
   gather_facts: yes
   become: true
