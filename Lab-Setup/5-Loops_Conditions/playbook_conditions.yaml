@@ -15,7 +15,7 @@
       dnf:
         name: httpd
         state: present
-    # When condition check with AND Logic to check if all the conditions are met.
+    # When condition with AND Logic to check if the requirement is met.
       when:
         - ansible_facts['os_family'] == "RedHat"
         - ansible_facts['distribution'] == "OracleLinux"
