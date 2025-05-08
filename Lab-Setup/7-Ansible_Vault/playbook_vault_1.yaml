@@ -40,7 +40,18 @@
 
         - name: Ensure Apache welcome page exists and has content
           copy:
-            content: "Welcome to {{ ansible_hostname }}!"
+            content: |
+              <html>
+              <head>
+                  <meta charset="UTF-8">
+                  <title>Apache Installation Playbook</title>
+              </head>
+              <body>
+                  <div class="container">
+                      <h1>"Welcome to {{ ansible_hostname }}!"</h1>
+                  </div>
+              </body>
+              </html>
             dest: "{{ apache_welcome }}"
             owner: apache
             group: apache

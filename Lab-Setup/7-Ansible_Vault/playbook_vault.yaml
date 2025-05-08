@@ -36,7 +36,7 @@
 
       - name: Write server name to Apache welcome page if file is empty or missing
         copy:
-          content: "Welcome to {{ ansible_hostname }}!"
+          content: <h1>"Welcome to {{ ansible_hostname }}!"</h1>
           dest: "{{ apache_welcome }}"
           owner: apache
           group: apache
