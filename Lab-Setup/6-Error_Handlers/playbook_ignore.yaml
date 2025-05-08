@@ -1,6 +1,6 @@
 - name: Ignore Errors
   hosts: localhost
-  become: false
+  asible_become: false
   gather_facts: no
   tasks:
     # Ignore errors

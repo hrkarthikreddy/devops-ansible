@@ -14,12 +14,12 @@
         state: present
 
     # Custom error condition with failed_when
-    - name: Validate Nginx COnfiguation Syntax (Check the custom failure condition)
+    - name: Validate Nginx Configuation Syntax (Check the custom failure condition)
       ansible.builtin.command: nginx -t
       register: nginx_test
       failed_when: "'syntax is ok' not in nginx_test.stderr"
 
-    - name: Start adn Enable Nginx
+    - name: Start and Enable Nginx
       ansible.builtin.service:
         name: nginx
         state: started

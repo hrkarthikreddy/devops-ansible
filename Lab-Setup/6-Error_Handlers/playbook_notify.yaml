@@ -1,0 +1,50 @@
+---
+- name: Uninstall Nginx using notify and handlers
+  hosts: all
+  gather_facts: yes
+  become: true
+
+  tasks:
+
+    - name: Check if nginx is installed
+      ansible.builtin.shell: rpm -q nginx
+      register: nginx_check
+      ignore_errors: yes
+
+    - name: Stop Nginx service
+      ansible.builtin.service:
+        name: nginx
+        state: stopped
+      ignore_errors: yes
+      notify: 
+        - "Uninstall Nginx package"
+        - "Remove configuration files"
+        - "Remove Nginx logs"
+        - "Reload firewall"
+      when: nginx_check.rc == 0
+
+  handlers:
+
+    - name: Uninstall Nginx package
+      ansible.builtin.package:
+        name: nginx
+        state: absent
+
+    - name: Remove configuration files
+      ansible.builtin.file:
+        path: /etc/nginx
+        state: absent
+
+    - name: Remove Nginx logs
+      ansible.builtin.file:
+        path: /var/log/nginx
+        state: absent
+
+    - name: Reload firewall
+      ansible.builtin.service:
+        name: firewalld
+        state: reloaded
+
+    - name: Notify user of completion
+      ansible.builtin.debug:
+        msg: "Nginx has been uninstalled and related files cleaned up."
