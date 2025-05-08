@@ -1,0 +1,96 @@
+---
+- name: Install Apache and configure basic authentication
+  hosts: Webservers
+  become: yes
+  vars:
+    - apache_welcome: /var/www/html/index.html
+  vars_files:
+    - group_vars/Webservers/vault.yaml
+    - group_vars/Webservers/vars.yaml
+
+  pre_tasks:
+    - name: Ensure python3 and pip are installed
+      package:
+        name:
+          - python3
+          - python3-pip
+        state: present
+
+    - name: Ensure passlib is installed via pip
+      pip:
+        name: passlib
+        executable: pip3
+
+  tasks:
+    - block:
+        - name: Install Apache and httpd-tools
+          package:
+            name:
+              - httpd
+              - httpd-tools
+            state: present
+          notify:
+            - Start and enable Apache service
+            - Open Firewall for Apache
+
+        - name: Set SELinux to permissive (runtime)
+          command: setenforce 0
+          when: ansible_selinux.status == "enabled"
+          ignore_errors: yes
+
+        - name: Ensure Apache welcome page exists and has content
+          copy:
+            content: "Welcome to {{ ansible_hostname }}!"
+            dest: "{{ apache_welcome }}"
+            owner: apache
+            group: apache
+            mode: '0644'
+
+        - name: Create htpasswd file for basic authentication
+          community.general.htpasswd:
+            path: "{{ apache_auth_file }}"
+            name: "{{ apache_auth_user }}"
+            password: "{{ apache_auth_password }}"
+            crypt_scheme: sha256_crypt
+          no_log: true
+          register: htpasswd_create
+
+        - name: Configure Apache for basic authentication
+          blockinfile:
+            path: /etc/httpd/conf.d/auth_basic.conf
+            create: yes
+            block: |
+              <Directory "/var/www/html">
+                AuthType Basic
+                AuthName "Restricted Content"
+                AuthUserFile {{ apache_auth_file }}
+                Require valid-user
+              </Directory>
+          notify: Restart Apache
+          when: htpasswd_create.changed
+
+      rescue:
+        - name: Apache installation and basic authentication failed
+          debug:
+            msg: |
+              Apache installation or authentication setup failed on the host {{ ansible_hostname }}.
+              Please check the previous task output for details.
+
+  handlers:
+    - name: Restart Apache
+      service:
+        name: httpd
+        state: restarted
+
+    - name: Start and enable Apache service
+      service:
+        name: httpd
+        state: started
+        enabled: true
+
+    - name: Open Firewall for Apache
+      firewalld:
+        service: http
+        permanent: true
+        state: enabled
+        immediate: yes

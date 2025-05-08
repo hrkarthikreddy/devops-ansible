@@ -1,0 +1,2 @@
+apache_auth_file: "/etc/httpd/.htpasswd"
+apache_auth_dir: "/var/www/html"

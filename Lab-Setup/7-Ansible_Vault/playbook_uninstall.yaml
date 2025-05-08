@@ -1,0 +1,79 @@
+---
+- name: Uninstall Apache and clean up configuration
+  hosts: Webservers
+  become: yes
+
+  tasks:
+    - name: Stop and disable Apache service
+      service:
+        name: httpd
+        state: stopped
+        enabled: false
+
+    - name: Remove Apache (httpd) and httpd-tools packages
+      package:
+        name:
+          - httpd
+          - httpd-tools
+        state: absent
+        autoremove: yes
+
+    - name: Remove Apache document root
+      file:
+        path: /var/www/html
+        state: absent
+
+    - name: Remove Apache authentication file
+      file:
+        path: /etc/httpd/.htpasswd
+        state: absent
+
+    - name: Remove Apache authentication configuration
+      file:
+        path: /etc/httpd/conf.d/auth_basic.conf
+        state: absent
+
+    - name: Remove default Apache configuration files (if any)
+      file:
+        path: /etc/httpd/conf.d/welcome.conf
+        state: absent
+
+    - name: Remove any remaining Apache config files
+      file:
+        path: /etc/httpd/conf.d
+        state: absent
+
+    - name: Remove Apache main configuration directory (if empty)
+      file:
+        path: /etc/httpd
+        state: absent
+
+    - name: Reset firewalld to default (removes all custom rules)
+      command: firewall-cmd --reload
+      when: ansible_facts.services['firewalld'].state == "running"
+      ignore_errors: yes
+
+    - name: Remove HTTP service from firewalld permanently
+      firewalld:
+        service: http
+        permanent: true
+        state: disabled
+        immediate: yes
+      when: ansible_facts.services['firewalld'].state == "running"
+      ignore_errors: yes
+
+    - name: Remove HTTPS service from firewalld permanently
+      firewalld:
+        service: https
+        permanent: true
+        state: disabled
+        immediate: yes
+      when: ansible_facts.services['firewalld'].state == "running"
+      ignore_errors: yes
+
+    - name: Reload firewalld to apply changes
+      service:
+        name: firewalld
+        state: reloaded
+      when: ansible_facts.services['firewalld'].state == "running"
+      ignore_errors: yes

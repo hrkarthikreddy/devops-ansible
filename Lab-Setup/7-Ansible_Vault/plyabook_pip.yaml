@@ -1,0 +1,12 @@
+---
+  - name: Ensure pip is installed
+    yum:
+      name: python3-pip
+      state: present
+    register: pip_install
+
+  - name: Ensure passlib is installed via pip
+    pip:
+      name: passlib
+      executable: pip3
+    when: pip_install is not failed

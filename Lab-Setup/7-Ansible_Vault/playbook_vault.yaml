@@ -1,0 +1,108 @@
+---
+
+- name: Install Apache and configured basic authentication
+  hosts: Webservers
+  become: yes
+  vars:
+    - apache_welcome: /var/www/html/index.html
+  vars_files:
+    - group_vars/Webservers/vault.yaml
+    - group_vars/Webservers/vars.yaml
+
+  tasks:
+
+    - block:
+      - name: Check if Apache is installed
+        ansible.builtin.shell: rpm -q httpd
+        register: apache_check
+
+      - name: Install Apache and httpd-tools
+        ansible.builtin.package:
+          name:
+            - httpd
+            - httpd-tools
+          state: present
+        notify:
+          - Start and enable Apache service
+          - Open Firewall for Apache
+          - Disable SELinux
+        when: apache_check.rc != 0
+
+      - name: Check if Apache welcome page exists and has content
+        stat:
+          path: "{{ apache_welcome }}"
+        register: welcome_stat
+        #when: apache_check.rc != 0
+
+      - name: Write server name to Apache welcome page if file is empty or missing
+        copy:
+          content: "Welcome to {{ ansible_hostname }}!"
+          dest: "{{ apache_welcome }}"
+          owner: apache
+          group: apache
+          mode: '0644'
+        changed_when: not (welcome_stat.stat.exists and welcome_stat.stat.size > 0)
+        #when: apache_check.rc != 0
+
+      - name: Create htpasswd file for basic authentication
+        community.general.htpasswd:
+          path: "{{ apache_auth_file}}"
+          name: "{{ apache_auth_user }}"
+          password: "{{ apache_auth_password }}"
+          crypt_scheme: sha256_crypt
+        #no_log: true
+        register: htpasswd_create
+        notify: Restart Apache
+        when: not apache_check.failed
+
+      - name: Create Apache configuration file
+        ansible.builtin.blockinfile:
+          path: /etc/httpd/config.d/auth_basic.conf
+          create: yes
+          content: |
+            <Directory "/var/www/html">
+              AuthType Basic
+              AuthName "Restricted Content"
+              AuthUserFile {{ apache_auth_file }}
+              Require valid-user
+            </Directory>
+            <Location "/">
+              Require all granted
+            </Location>
+        notify: Restart Apache
+        register: apache_config
+        when: htpasswd_create.changed
+
+      rescue:
+        - name: Apache Installation and basic authentication Failed
+          ansible.builtin.debug:
+            msg: |
+              Apache installation failed on the host {{ ansible_hostname }}
+            # Error: {{  ansible_failed_result }}
+            # Task: {{ ansible_failed_task }}
+          when: apache_check.rc != 0
+
+  handlers:
+    - name: Restart Apache
+      ansible.builtin.service:
+        name: httpd
+        state: restarted
+
+    - name: Open Firewall for Apache
+      ansible.builtin.firewalld:
+        service: http
+        permanent: true
+        state: enabled
+        immediate: yes
+    
+    - name: Disable SELinux
+      ansible.builtin.command: setenforce 0
+      ignore_errors: yes
+      when: ansible_selinux.status == "enabled"
+
+    - name: Start and enable Apache service
+      ansible.builtin.service:
+        name: httpd
+        state: started
+        enabled: true
+      ignore_errors: yes
