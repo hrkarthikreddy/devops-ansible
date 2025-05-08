@@ -1,0 +1,68 @@
+---
+- name: Apache Install & Config with Hostname Welcome (Oracle Linux 8)
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    apache_welcome: /var/www/html/index.html
+    apache_conf_src: httpd.conf
+    apache_conf_dest: /etc/httpd/conf/httpd.conf
+
+  tasks:
+    # 1. Install Apache only if running on Oracle Linux 8 (when)
+    - name: Install Apache if Oracle Linux 8
+      dnf:
+        name: httpd
+        state: present
+    # When condition check with AND Logic to check if all the conditions are met.
+      when:
+        - ansible_facts['os_family'] == "RedHat"
+        - ansible_facts['distribution'] == "OracleLinux"
+        - ansible_facts['distribution_major_version'] == "8"
+
+    # 2. Check if Apache welcome page exists and has content
+    - name: Check if Apache welcome page exists and has content
+      stat:
+        path: "{{ apache_welcome }}"
+      register: welcome_stat
+
+    # 3. Write server name to Apache welcome page if file is empty or missing (changed_when)
+    - name: Write server name to Apache welcome page if file is empty or missing
+      copy:
+        content: "Welcome to {{ ansible_hostname }}!"
+        dest: "{{ apache_welcome }}"
+        owner: apache
+        group: apache
+        mode: '0644'
+      changed_when: not (welcome_stat.stat.exists and welcome_stat.stat.size > 0)
+
+    # 4. Start Apache service
+    - name: Start Apache service
+      service:
+        name: httpd
+        state: started
+        enabled: true
+
+    # 5. Check Apache service status and fail if not running (failed_when)
+    - name: Check Apache service status and fail if not running
+      shell: systemctl status httpd
+      register: apache_status
+      failed_when: "'Active: active (running)' not in apache_status.stdout"
+      ignore_errors: yes
+
+    # 6. Check if Apache config source exists
+    - name: Check if Apache config source exists
+      stat:
+        path: "{{ apache_conf_src }}"
+      register: conf_stat
+
+    # 7. Copy Apache config only if source exists (skipped_when)
+    - name: Copy Apache config only if source exists (skipped_when)
+      copy:
+        src: "{{ apache_conf_src }}"
+        dest: "{{ apache_conf_dest }}"
+        owner: root
+        group: root
+        mode: '0644'
+      skipped_when: not conf_stat.stat.exists | default(false)
