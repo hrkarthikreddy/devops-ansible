@@ -1,0 +1,44 @@
+---
+- name: Uninstall and clean up Nginx on web servers
+  hosts: Webservers
+  become: yes
+
+  tasks:
+
+    - name: Stop Nginx service
+      ansible.builtin.service:
+        name: nginx
+        state: stopped
+      ignore_errors: yes
+
+    - name: Disable Nginx service
+      ansible.builtin.service:
+        name: nginx
+        enabled: no
+      ignore_errors: yes
+
+    - name: Remove Nginx package
+      ansible.builtin.package:
+        name: nginx
+        state: absent
+
+    - name: Remove Nginx index.html file
+      ansible.builtin.file:
+        path: /usr/share/nginx/html/index.html
+        state: absent
+
+    - name: Close port 80 in firewalld
+      ansible.builtin.firewalld:
+        port: 80/tcp
+        permanent: yes
+        state: disabled
+        immediate: yes
+      ignore_errors: yes
+
+    - name: Revert SELinux boolean for Nginx network connections
+      ansible.posix.seboolean:
+        name: httpd_can_network_connect
+        state: false
+        persistent: yes
+      when: ansible_selinux.status == "enabled"
+      ignore_errors: yes

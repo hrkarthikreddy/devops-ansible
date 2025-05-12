@@ -1,0 +1,52 @@
+---
+- name: Install and start Nginx on web servers
+  hosts: Webservers
+
+  tasks:
+
+    - name: Ensure Nginx is installed
+      ansible.builtin.package:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Open port 80 for Nginx
+      ansible.builtin.firewalld:
+        port: 80/tcp
+        permanent: yes
+        state: enabled
+        immediate: yes
+
+    - name: Configure seliux for Nginx
+      ansible.posix.seboolean:
+        name: httpd_can_network_connect
+        state: true
+        persistent: yes
+      when: ansible_selinux.status == "enabled"
+
+    - name: write content to the nginx index.html
+      ansible.builtin.copy:
+        dest: /usr/share/nginx/html/index.html
+        content: |
+          <html>
+              <head>
+                  <meta charset="UTF-8">
+                  <title>Nginx Installation Playbook</title>
+              </head>
+              <body>
+                  <div class="container">
+                      <h1>"Welcome to Nginx configuration on {{ ansible_hostname }} by using ansible configuration files!"</h1>
+                  </div>
+              </body>
+              </html>
+        owner: nginx
+        group: nginx
+        mode: '0644'
+    
+    - name: Ensure Nginx is running
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    
