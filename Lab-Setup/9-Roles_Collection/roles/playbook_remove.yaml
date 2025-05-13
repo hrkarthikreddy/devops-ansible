@@ -1,0 +1,101 @@
+---
+- name: Remove WordPress and all dependencies from Oracle Linux 8
+  hosts: wordpress
+  become: yes
+  vars:
+    wp_db_name: wordpress
+    wp_db_user: wordpress
+    wp_db_password: wordpress_password
+    wp_install_dir: /var/www/html
+    apache_packages:
+      - httpd
+      - httpd-tools
+    php_packages:
+      - php
+      - php-mysqlnd
+      - php-gd
+      - php-mbstring
+      - php-xml
+      - php-json
+      - php-opcache
+      - php-fpm
+    mariadb_packages:
+      - mariadb-server
+      - mariadb
+      - MySQL-python
+  tasks:
+    - name: Stop Apache service
+      service:
+        name: httpd
+        state: stopped
+      ignore_errors: yes
+
+    - name: Stop MariaDB service
+      service:
+        name: mariadb
+        state: stopped
+      ignore_errors: yes
+
+    - name: Remove Apache packages
+      yum:
+        name: "{{ apache_packages }}"
+        state: absent
+
+    - name: Remove PHP packages
+      yum:
+        name: "{{ php_packages }}"
+        state: absent
+
+    - name: Remove MariaDB packages
+      yum:
+        name: "{{ mariadb_packages }}"
+        state: absent
+
+    - name: Remove WordPress files
+      file:
+        path: "{{ wp_install_dir }}"
+        state: absent
+
+    - name: Remove Apache config files
+      file:
+        path: /etc/httpd
+        state: absent
+
+    - name: Remove PHP config files
+      file:
+        path: /etc/php.ini
+        state: absent
+      ignore_errors: yes
+
+    - name: Remove MariaDB data directory
+      file:
+        path: /var/lib/mysql
+        state: absent
+
+    - name: Remove WordPress database
+      community.mysql.mysql_db:
+        name: "{{ wp_db_name }}"
+        state: absent
+        login_user: root
+        login_password: "{{ mysql_root_password | default('') }}"
+      ignore_errors: yes
+
+    - name: Remove WordPress database user
+      community.mysql.mysql_user:
+        name: "{{ wp_db_user }}"
+        host: "localhost"
+        state: absent
+        login_user: root
+        login_password: "{{ mysql_root_password | default('') }}"
+      ignore_errors: yes
+
+    - name: Clean up yum cache
+      yum:
+        name: '*'
+        state: latest
+        update_cache: yes
+
+    - name: Remove unused dependencies
+      yum:
+        autoremove: yes
+      ignore_errors: yes
