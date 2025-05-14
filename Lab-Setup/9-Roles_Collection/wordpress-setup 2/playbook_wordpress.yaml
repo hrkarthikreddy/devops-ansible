@@ -1,0 +1,10 @@
+---
+- name: Full WordPress Deployment
+  hosts: wordpress
+  become: yes
+  vars:
+    mysql_root_password: your_root_password_here  # Replace or encrypt with vault
+
+  roles:
+    - database
+    - wordpress

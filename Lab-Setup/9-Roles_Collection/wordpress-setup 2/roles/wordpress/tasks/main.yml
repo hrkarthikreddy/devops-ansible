@@ -1,0 +1,72 @@
+- name: Install Apache and PHP
+  dnf:
+    name:
+      - httpd
+      - php
+      - php-fpm
+      - php-mysqlnd
+      - php-gd
+      - php-xml
+      - php-mbstring
+    state: present
+
+- name: Start Apache and PHP-FPM
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - httpd
+    - php-fpm
+
+- name: Create web root
+  file:
+    path: /var/www/html
+    state: directory
+    owner: apache
+    group: apache
+    mode: '0755'
+
+- name: Download WordPress
+  get_url:
+    url: https://wordpress.org/latest.tar.gz
+    dest: /tmp/wordpress.tar.gz
+
+- name: Extract WordPress
+  unarchive:
+    src: /tmp/wordpress.tar.gz
+    dest: /tmp
+    remote_src: yes
+
+- name: Copy WordPress files
+  shell: cp -a /tmp/wordpress/. /var/www/html/
+
+- name: Set correct permissions
+  file:
+    path: /var/www/html
+    owner: apache
+    group: apache
+    recurse: yes
+
+- name: Deploy wp-config.php
+  template:
+    src: wp-config.php.j2
+    dest: /var/www/html/wp-config.php
+    owner: apache
+    group: apache
+
+- name: Add PHP-FPM handler in Apache
+  copy:
+    dest: /etc/httpd/conf.d/php-fpm.conf
+    content: |
+      <FilesMatch \.php$>
+        SetHandler "proxy:unix:/run/php-fpm/www.sock|fcgi://localhost/"
+      </FilesMatch>
+      <Directory /var/www/html>
+        AllowOverride All
+        Require all granted
+      </Directory>
+      DirectoryIndex index.php index.html
+
+- name: Restore SELinux context
+  command: restorecon -Rv /var/www/html

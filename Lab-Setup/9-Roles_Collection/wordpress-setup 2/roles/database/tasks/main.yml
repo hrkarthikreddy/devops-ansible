@@ -1,0 +1,38 @@
+- name: Install MariaDB
+  dnf:
+    name: mariadb-server
+    state: present
+    update_cache: yes
+
+- name: Start and enable MariaDB
+  service:
+    name: mariadb
+    state: started
+    enabled: yes
+
+- name: Install PyMySQL for Python
+  pip:
+    name: PyMySQL
+    executable: pip3
+
+- name: Set root password (if new install)
+  command: >
+    mysqladmin -u root password "{{ mysql_root_password }}"
+  ignore_errors: yes
+
+- name: Create WordPress database
+  community.mysql.mysql_db:
+    name: "{{ wp_db_name }}"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: Create WordPress user
+  community.mysql.mysql_user:
+    name: "{{ wp_db_user }}"
+    password: "{{ wp_db_password }}"
+    priv: "{{ wp_db_name }}.*:ALL"
+    host: localhost
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
