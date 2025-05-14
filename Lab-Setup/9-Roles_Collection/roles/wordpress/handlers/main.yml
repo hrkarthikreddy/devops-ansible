@@ -1,7 +1,0 @@
----
-# handlers file for roles/wordpress
-- name: Restart Apache
-  ansible.builtin.service:
-    name: httpd
-    state: restarted
-  become: yes

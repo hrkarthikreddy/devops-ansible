@@ -1,0 +1,26 @@
+---
+# tasks file for webserver
+- name: Install Apache and PHP
+  ansible.builtin.dnf:
+    name:
+      - httpd
+      - php
+      - php-fpm
+      - php-json
+      - php-mysqlnd
+      - php-gd
+      - php-xml
+      - php-mbstring
+    state: present
+  notify: Start Apache and PHP-FPM
+
+- name: Create web root
+  ansible.builtin.file:
+    path: /var/www/html
+    state: directory
+    owner: apache
+    group: apache
+    mode: '0755'
+  notify: Restart Apache
+
+  

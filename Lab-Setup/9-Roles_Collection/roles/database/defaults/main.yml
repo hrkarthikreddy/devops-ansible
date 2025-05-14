@@ -1,8 +1,0 @@
----
-# defaults file for roles/database
-
-mysql_root_user: root
-mysql_root_password: D3f@ult#r00t$01
-wp_db_name: wordpress
-wp_db_user: wordpress
-wp_db_password: securepassword

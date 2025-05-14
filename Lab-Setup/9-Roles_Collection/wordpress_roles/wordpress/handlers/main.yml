@@ -1,0 +1,13 @@
+---
+# handlers file for wordpress
+- name: Restart Apache
+  ansible.builtin.service:
+    name: httpd
+    state: restarted
+    enabled: yes
+
+- name: Restart PHP-FPM
+  ansible.builtin.service:
+    name: php-fpm
+    state: restarted
+    enabled: yes
