@@ -75,13 +75,12 @@
 - name: Restore SELinux context on WordPress directory
   ansible.builtin.command: restorecon -Rv /var/www/html
   become: yes
-  notify: restart apache
 
-- name: Display last 100 lines of PHP error log
-  command: tail -100 /var/log/httpd/error.log
-  register: php_errors
-- debug:
-    var: php_errors.stdout_lines
+# - name: Display last 100 lines of PHP error log
+#   command: tail -100 /var/log/httpd/error.log
+#   register: php_errors
+# - debug:
+#     var: php_errors.stdout_lines
 
 - name: Restart Apache
   ansible.builtin.service:
