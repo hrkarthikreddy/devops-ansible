@@ -1,0 +1,121 @@
+---
+- name: Fully uninstall WordPress, PHP, MariaDB, Apache and all configs from Oracle Linux 8
+  hosts: wordpress
+  become: yes
+
+  vars:
+    wordpress_db_name: wordpress   # Change as needed
+    db_root_user: root            # Change as needed
+    db_root_password: "rootsecurepassword"          # Set MariaDB root password here if needed
+
+  tasks:
+    - name: Ensure MariaDB is running for DB removal
+      service:
+        name: mariadb
+        state: started
+      ignore_errors: yes
+
+    - name: Remove WordPress database (optional, before uninstalling MariaDB)
+      community.mysql.mysql_db:
+        name: "{{ wordpress_db_name }}"
+        state: absent
+        login_user: "{{ db_root_user }}"
+        login_password: "{{ db_root_password }}"
+      ignore_errors: yes
+
+    - name: Remove WordPress database user (optional, before uninstalling MariaDB)
+      community.mysql.mysql_user:
+        name: wordpress
+        host: localhost
+        state: absent
+        login_user: "{{ db_root_user }}"
+        login_password: "{{ db_root_password }}"
+      ignore_errors: yes
+
+    - name: Stop Apache and PHP-FPM services
+      service:
+        name: "{{ item }}"
+        state: stopped
+      loop:
+        - httpd
+        - php-fpm
+      ignore_errors: yes
+
+    - name: Stop MariaDB service
+      service:
+        name: mariadb
+        state: stopped
+      ignore_errors: yes
+
+    - name: Remove Apache, PHP, MariaDB, and WordPress packages
+      yum:
+        name:
+          - httpd
+          - mariadb-server
+          - mariadb
+          - php*
+          - wordpress
+        state: absent
+        autoremove: yes
+
+    - name: Remove Apache configuration and web root
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/httpd
+        - /var/www
+        - /var/log/httpd
+
+    - name: Remove PHP configuration
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/php.d
+        - /etc/php.ini
+        - /var/log/php-fpm
+        - /etc/php-fpm.d
+        - /etc/php-fpm.conf
+
+    - name: Remove MariaDB configuration and data
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/my.cnf
+        - /etc/my.cnf.d
+        - /var/lib/mysql
+        - /var/log/mariadb
+        - /var/log/mysql
+        - /etc/mysql
+
+    - name: Remove WordPress files if present
+      file:
+        path: /var/www/html/wordpress
+        state: absent
+
+    - name: Remove any leftover WordPress files in web root
+      file:
+        path: /var/www/html
+        state: absent
+
+    - name: Remove user and group 'mysql' if exists
+      user:
+        name: mysql
+        state: absent
+        remove: yes
+      ignore_errors: yes
+
+    - name: Remove user and group 'apache' if exists
+      user:
+        name: apache
+        state: absent
+        remove: yes
+      ignore_errors: yes
+
+    - name: Autoremove orphaned packages
+      command: yum -y autoremove
+
+    - name: Clean yum cache
+      command: yum clean all
