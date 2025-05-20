@@ -7,12 +7,12 @@
 
 # If password based authentication is used for login to managed nodes
 
-## Managed Nodes:
+#### Managed Nodes:
 
         useradd ansible
         passwd ansible
         # Rest the password
 
-## Control Node:
+#### Control Node:
 
         ssh copy-id ansbile@ip-address
