@@ -1,0 +1,34 @@
+- name: uninstall and remove IIS configuration
+  hosts: windows
+  gather_facts: no
+  tasks:
+
+    - name: Stop IIS service
+      ansible.windows.win_service:
+        name: W3SVC
+        state: stopped
+
+- name: Remove IIS firewall rules
+  hosts: windows
+  tasks:
+    - name: Check if firewall rules are present
+      ansible.windows.win_shell: |
+        Get-NetFirewallRule -DisplayName "Allow HTTP for IIS", "Allow HTTPS for IIS"
+      register: result
+      ignore_errors: true
+
+    - name: Show firewall rules result
+      ansible.builtin.debug:
+        var: result.stdout
+
+    - name: Remove IIS firewall rules
+      community.windows.win_firewall_rule:
+        name: Allow HTTP for IIS
+        state: absent
+      ignore_errors: true
+
+    - name: Remove IIS firewall rules
+      community.windows.win_firewall_rule:
+        name: Allow HTTPS for IIS
+        state: absent
+      ignore_errors: true
