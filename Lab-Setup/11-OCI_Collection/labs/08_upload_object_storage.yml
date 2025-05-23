@@ -1,0 +1,18 @@
+- name: Upload to OCI Object Storage
+  hosts: localhost
+  gather_facts: no
+  collections:
+    - oracle.oci
+  vars:
+    namespace_name: "your_namespace"
+    bucket_name: "training-bucket"
+    file_path: "/path/to/file.txt"
+    object_name: "file.txt"
+  tasks:
+    - name: Upload object to OCI bucket
+      oci_objectstorage_object:
+        namespace_name: "{{ namespace_name }}"
+        bucket_name: "{{ bucket_name }}"
+        name: "{{ object_name }}"
+        file: "{{ file_path }}"
+        state: present

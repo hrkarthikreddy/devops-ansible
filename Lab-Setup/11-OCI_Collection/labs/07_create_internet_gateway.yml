@@ -1,0 +1,16 @@
+- name: Create Internet Gateway
+  hosts: localhost
+  gather_facts: no
+  collections:
+    - oracle.oci
+  tasks:
+    - name: Create Internet Gateway
+      oci_network_internet_gateway:
+        compartment_id: "{{ compartment_ocid }}"
+        vcn_id: "{{ vcn_result.vcn.id }}"
+        display_name: "TrainingIG"
+        is_enabled: true
+        state: present
+      register: ig_result
+
+    - debug: var=ig_result

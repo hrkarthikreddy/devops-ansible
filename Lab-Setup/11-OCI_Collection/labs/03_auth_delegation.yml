@@ -1,0 +1,18 @@
+---
+- name: List vcns
+  collections:
+    - oracle.oci
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  connection: local
+  hosts: localhost
+  tasks:
+    - name: List VCN
+      oci_network_vcn_facts:
+        compartment_id: "ocid1.compartment.oc1..aaaaaaXXXXXuebei3wz4q"
+        auth_type: "instance_obo_user"
+        region: "us-phoenix-1"
+      register: result
+    - name: Dump result
+      debug:
+        msg: '{{result}}'

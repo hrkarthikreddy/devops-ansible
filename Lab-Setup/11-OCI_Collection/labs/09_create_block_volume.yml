@@ -1,0 +1,17 @@
+- name: Create Block Volume
+  hosts: localhost
+  gather_facts: no
+  collections:
+    - oracle.oci
+  tasks:
+    - name: Create Block Volume
+      oci_blockstorage_volume:
+        compartment_id: "{{ compartment_ocid }}"
+        availability_domain: "{{ availability_domain }}"
+        display_name: "TrainingVolume"
+        size_in_gbs: 50
+        state: present
+      register: volume_result
+
+    - debug: var=volume_result
+

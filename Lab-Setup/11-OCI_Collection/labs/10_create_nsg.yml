@@ -1,0 +1,16 @@
+- name: Create Network Security Group (NSG)
+  hosts: localhost
+  gather_facts: no
+  collections:
+    - oracle.oci
+  tasks:
+    - name: Create NSG
+      oci_core_network_security_group:
+        compartment_id: "{{ compartment_ocid }}"
+        vcn_id: "{{ vcn_result.vcn.id }}"
+        display_name: "TrainingNSG"
+        state: present
+      register: nsg_result
+
+    - debug: var=nsg_result
+

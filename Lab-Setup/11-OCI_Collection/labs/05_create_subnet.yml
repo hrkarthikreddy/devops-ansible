@@ -1,0 +1,19 @@
+- name: Create Subnet
+  hosts: localhost
+  gather_facts: no
+  collections:
+    - oracle.oci
+  tasks:
+    - name: Create subnet
+      oci_network_subnet:
+        compartment_id: "{{ compartment_ocid }}"
+        vcn_id: "{{ vcn_result.vcn.id }}"
+        cidr_block: "10.0.1.0/24"
+        availability_domain: "{{ availability_domain }}"
+        display_name: "TrainingSubnet"
+        dns_label: "subnet"
+        prohibit_public_ip_on_vnic: false
+        state: present
+      register: subnet_result
+
+    - debug: var=subnet_result

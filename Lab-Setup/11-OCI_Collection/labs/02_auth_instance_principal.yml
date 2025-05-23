@@ -1,0 +1,16 @@
+---
+- name: List vcns
+  collections:
+    - oracle.oci
+  connection: local
+  hosts: localhost
+  tasks:
+    - name: List VCN
+      oci_network_vcn_facts:
+        compartment_id: "ocid1.compartment.oc1..xxxxxxEXAMPLExxxxxx"
+        auth_type: "instance_principal"
+        region: "us-phoenix-1"
+      register: result
+    - name: Dump result
+      debug:
+        msg: '{{result}}'

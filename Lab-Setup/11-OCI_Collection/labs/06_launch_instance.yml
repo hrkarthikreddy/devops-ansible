@@ -1,0 +1,25 @@
+- name: Launch Compute Instance
+  hosts: localhost
+  gather_facts: no
+  collections:
+    - oracle.oci
+  tasks:
+    - name: Launch compute instance
+      oci_compute_instance:
+        compartment_id: "{{ compartment_ocid }}"
+        availability_domain: "{{ availability_domain }}"
+        display_name: "TrainingInstance"
+        shape: "VM.Standard.E3.Flex"
+        shape_config:
+          ocpus: 1
+          memory_in_gbs: 6
+        subnet_id: "{{ subnet_result.subnet.id }}"
+        assign_public_ip: true
+        source_details:
+          source_type: image
+          image_id: "{{ image_ocid }}"
+        metadata:
+          ssh_authorized_keys: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+      register: instance_result
+
+    - debug: var=instance_result

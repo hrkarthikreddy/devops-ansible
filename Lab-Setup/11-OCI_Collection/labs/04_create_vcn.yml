@@ -1,0 +1,17 @@
+- name: Create VCN
+  hosts: localhost
+  gather_facts: no
+  collections:
+    - oracle.oci
+  tasks:
+    - name: Create VCN
+      oci_network_vcn:
+        compartment_id: "{{ compartment_ocid }}"
+        display_name: "TrainingVCN"
+        cidr_block: "10.0.0.0/16"
+        dns_label: "trainingvcn"
+        state: present
+        #key_by: [compartment_id, display_name]
+      register: vcn_result
+
+    - debug: var=vcn_result
