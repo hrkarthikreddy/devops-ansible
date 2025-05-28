@@ -10,7 +10,7 @@
       oci_compute_instance:
         compartment_id: "{{ compartment_ocid }}"
         availability_domain: "{{ availability_domain }}"
-        display_name: "TrainingInstance"
+        display_name: "TrainingInstance-{{ '%02d' | format(item) }}"
         shape: "{{ shape }}"
         shape_config:
           ocpus: 1
@@ -21,6 +21,9 @@
           image_id: "{{ image_ocid }}"
         metadata:
           ssh_authorized_keys: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+      loop: "{{ range(1, 6) | list }}"
+      async: 600
+      poll: 0
       register: instance_result
 
     - debug: var=instance_result

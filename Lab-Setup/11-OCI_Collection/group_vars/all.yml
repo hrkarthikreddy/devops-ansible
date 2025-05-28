@@ -1,3 +1,5 @@
 compartment_ocid: "ocid1.compartment.oc1..example"
 availability_domain: "Uocm:PHX-AD-1"
 image_ocid: "ocid1.image.oc1.phx.example"
+shape: "VM.Standard.E4.Flex"
+subnet_ocid: "ocid1.subnet.oc1.phx.aaaaaaaxxxxxmvia"
