@@ -31,10 +31,10 @@ sudo yum update oci-ansible-collection
 ansible-galaxy collection install oracle.oci
 ```
 
-## 🗂️ Repo Structure
+## 🗂️ Repo Folder Structure
 
 ```
-ansible-oci-training/
+11-OCI_Collection/
 ├── inventory/
 │   ├── hosts.yml               # Localhost inventory
 │   ├── inventory.oci.yml
