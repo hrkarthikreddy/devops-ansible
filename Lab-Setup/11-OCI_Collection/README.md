@@ -12,7 +12,6 @@ You will learn to:
 ## 🧰 Prerequisites
 
 - An OCI account with proper permissions
-- API Key configured in `~/.oci/config`
 - Ansible 2.9+ installed
 - Oracle Ansible Collection installed:
 
@@ -41,6 +40,7 @@ ansible-oci-training/
 ├── group_vars/
 │   └── all.yml                 # OCI variables (update this with your tenancy-specific values)
 ├── labs/
+│   ├── 00_auth_api.yml
 │   ├── 01_auth_api.yml
 │   ├── 02_auth_instance_principal.yml
 │   ├── 03_auth_delegation.yml
@@ -50,7 +50,8 @@ ansible-oci-training/
 │   ├── 07_create_internet_gateway.yml
 │   ├── 08_upload_object_storage.yml
 │   ├── 09_create_block_volume.yml
-│   └── 10_create_nsg.yml
+│   ├── 10_create_nsg.yml
+│   └── 11_dynamic_inventory_apache.yml
 └── README.md
 ```
 
@@ -66,6 +67,7 @@ key_file=/home/ubuntu/.oci/oci_api_key.pem
 tenancy=ocid1.tenancy.oc1..xxxx
 region=us-ashburn-1
 ```bash
+ansible-playbook labs/00_auth_api.yml
 ansible-playbook labs/01_auth_api.yml
 ```
 
@@ -85,13 +87,14 @@ ansible-playbook labs/03_auth_delegation.yml
 Each lab file can be executed individually:
 
 ```bash
-ansible-playbook -i inventory/hosts.yml labs/04_create_vcn.yml
-ansible-playbook -i inventory/hosts.yml labs/05_create_subnet.yml
-ansible-playbook -i inventory/hosts.yml labs/06_launch_instance.yml
-ansible-playbook -i inventory/hosts.yml labs/07_create_internet_gateway.yml
-ansible-playbook -i inventory/hosts.yml labs/08_upload_object_storage.yml
-ansible-playbook -i inventory/hosts.yml labs/09_create_block_volume.yml
-ansible-playbook -i inventory/hosts.yml labs/10_create_nsg.yml
+ansible-playbook  labs/04_create_vcn.yml
+ansible-playbook  labs/05_create_subnet.yml
+ansible-playbook  labs/06_launch_instance.yml
+ansible-playbook  labs/07_create_internet_gateway.yml
+ansible-playbook  labs/08_upload_object_storage.yml
+ansible-playbook  labs/09_create_block_volume.yml
+ansible-playbook  labs/10_create_nsg.yml
+ansible-playbook  -i inventory/inventory.oci.yml labs/11_dynamic_inventory_apache.yml 
 ```
 
 ## 📎 References

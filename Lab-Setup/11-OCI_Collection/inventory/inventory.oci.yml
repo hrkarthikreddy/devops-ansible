@@ -1,0 +1,25 @@
+---
+plugin: oracle.oci.oci
+
+config_file: ~/.oci/config
+config_profile: DEFAULT
+
+# Optional fields to specify oci connection config:
+compartments:
+  - compartment_ocid: "ocid1.compartment.oc1..aaaaaaaaXXXXXXXXX7f6uebei3wz4q"
+    fetch_compute_hosts: true
+regions:
+  - us-phoenix-1
+#include_host_filters:
+#  - "'web' == freeform_tags.role"
+#  - "'VM.Standard2.16' == shape"
+keyed_groups:
+  - key: freeform_tags['role']
+    prefix: role
+host_var_expressions:
+  ansible_host: "private_ip"
+hostname_format_preferences:
+#  - "display_name+'-'+id"
+#  - "id"
+  - "private_ip"
+#  - "public_ip"

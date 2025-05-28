@@ -1,0 +1,21 @@
+---
+- name: Manage OCI Instances Tagged as Web
+  hosts: role_web
+  become: true
+  gather_facts: yes
+
+  tasks:
+    - name: Ping all web instances
+      ansible.builtin.ping:
+
+    - name: Install Apache
+      ansible.builtin.yum:
+        name: httpd
+        state: present
+
+    - name: Start and enable Apache service
+      ansible.builtin.service:
+        name: httpd
+        state: started
+        enabled: yes
+
