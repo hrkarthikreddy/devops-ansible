@@ -36,7 +36,8 @@ ansible-galaxy collection install oracle.oci
 ```
 ansible-oci-training/
 ├── inventory/
-│   └── hosts.yml               # Localhost inventory
+│   ├── hosts.yml               # Localhost inventory
+│   ├── inventory.oci.yml
 ├── group_vars/
 │   └── all.yml                 # OCI variables (update this with your tenancy-specific values)
 ├── labs/
