@@ -1,0 +1,14 @@
+---
+- name: Reboot Instances
+  hosts: XXXX
+  gather_facts: no
+  collections:
+    - oracle.oci
+  connection: local #Required
+  tasks:
+    - name: Perform action stop on instance with action_type = softreset
+      oci_compute_instance_actions:
+        instance_id: "{{ instance_id }}"
+        action: softreset
+        wait: no
+

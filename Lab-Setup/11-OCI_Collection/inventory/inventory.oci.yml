@@ -19,7 +19,7 @@ keyed_groups:
 host_var_expressions:
   ansible_host: "private_ip"
 hostname_format_preferences:
+  - "private_ip"
 #  - "display_name+'-'+id"
 #  - "id"
-  - "private_ip"
 #  - "public_ip"

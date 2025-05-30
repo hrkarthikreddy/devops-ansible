@@ -38,6 +38,7 @@ ansible-galaxy collection install oracle.oci
 ├── inventory/
 │   ├── hosts.yml               # Localhost inventory
 │   ├── inventory.oci.yml
+│   ├── ocihosts.oci.yml
 ├── group_vars/
 │   └── all.yml                 # OCI variables (update this with your tenancy-specific values)
 ├── labs/
@@ -52,7 +53,8 @@ ansible-galaxy collection install oracle.oci
 │   ├── 08_upload_object_storage.yml
 │   ├── 09_create_block_volume.yml
 │   ├── 10_create_nsg.yml
-│   └── 11_dynamic_inventory_apache.yml
+│   ├── 11_dynamic_inventory_apache.yml
+│   └── 12_reboot_instance.yml
 └── README.md
 ```
 
@@ -96,10 +98,11 @@ ansible-playbook  labs/08_upload_object_storage.yml
 ansible-playbook  labs/09_create_block_volume.yml
 ansible-playbook  labs/10_create_nsg.yml
 ansible-playbook  -i inventory/inventory.oci.yml labs/11_dynamic_inventory_apache.yml 
+ansible-playbook  -i inventory/ocihosts.oci.yml labs/12_reboot_instance.yml
 ```
 
 ## 📎 References
-
+- OCI Plugin Inventory : ansible-doc -t inventory oracle.oci.oci
 - [Oracle OCI Ansible Docs](https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/ansible.htm)
 - [OCI Ansible GitHub](https://github.com/oracle/oci-ansible-collection)
 

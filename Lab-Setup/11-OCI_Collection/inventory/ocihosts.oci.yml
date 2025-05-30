@@ -1,0 +1,13 @@
+---
+plugin: oracle.oci.oci
+
+compartments:
+  - compartment_ocid: "ocid1.compartment.oc1..aaaaaaaacXXXX3wz4q"
+    fetch_compute_hosts: true
+regions:
+  - us-phoenix-1
+compose:
+  ansible_host: private_ip
+  instance_id: id
+hostname_format_preferences:
+  - "display_name+' - '+id"
